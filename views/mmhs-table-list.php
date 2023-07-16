@@ -76,6 +76,7 @@ class MmhsTableList extends WP_List_Table {
         );
       }
     }
+
     return $posts_array;
   }
 
@@ -97,6 +98,7 @@ class MmhsTableList extends WP_List_Table {
       'title'        => 'Title',
       'mmhs_excerpt' => 'Excerpt',
       'slug'         => 'Post Slug',
+      'action'       => 'Action',
     );
     return $columns;
   }
@@ -108,10 +110,34 @@ class MmhsTableList extends WP_List_Table {
       case 'title':
       case 'mmhs_excerpt':
       case 'slug':
-      return $item[$column_name];
+        return $item[$column_name];
+      case 'action':
+        return "<a href='?page=" . $_GET['page'] . "&action=mmhs-edit&post_id=" . $item['id'] . " '>Edit</a> | <a href='?page=" . $_GET['page'] . "&action=mmhs-delete&post_id=" . $item['id'] . " '>Delete</a>" ;
       default:
-      return 'No value found';
+        return 'No value found';
     }
+  }
+
+  /*
+    Display action button like edit or delete etc.
+    ai function er nam column_**** jekhane **** = jai column er upor amra edit or delete button dekhate chai.
+  */
+  public function column_title( $item ) {
+    // 1st method
+    /* 
+      $action = array(
+        "edit"      => "<a href='?page=" . $_GET['page'] . "&action=mmhs-edit&post_id=" . $item['id'] . " '>Edit</a>",
+        "delete"    => "<a href='?page=" . $_GET['page'] . "&action=mmhs-delete&post_id=" . $item['id'] . " '>Delete</a>",
+      ); 
+    */
+
+    // 2nd method - recommented
+    $action = array(
+      "edit"      => sprintf( '<a href="?page=%s&action=%s&post_id=%s">Edit</a>', $_GET['page'], 'mmhs-edit', $item['id'] ),
+      "delete"    => sprintf( '<a href="?page=%s&action=%s&post_id=%s">Delete</a>', $_GET['page'], 'mmhs-delete', $item['id'] )
+    );
+
+    return sprintf( '%1$s %2$s', $item['title'], $this->row_actions( $action ) );
   }
   
   

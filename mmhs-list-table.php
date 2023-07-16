@@ -11,9 +11,27 @@ function mmhs_list_table_menu() {
 }
 
 function wpl_mmhs_list_table_fn() {
-  ob_start();
-  include_once plugin_dir_path(__FILE__) . 'views/mmhs-table-list.php';
-  $template = ob_get_contents();
-  ob_end_clean();
-  echo $template;
+  $action = isset( $_GET['action'] ) ? trim( $_GET['action'] ) : "";
+
+    if( $action == 'mmhs-edit' ) {
+      $post_id = isset( $_GET['post_id'] ) ? intval( $_GET['post_id'] ) : "";
+      ob_start();
+      include_once plugin_dir_path(__FILE__) . 'views/mmhs-edit-fn.php';
+      $template = ob_get_contents();
+      ob_end_clean();
+      echo $template;
+    } elseif( $action == 'mmhs-delete' ) {
+      $post_id = isset( $_GET['post_id'] ) ? intval( $_GET['post_id'] ) : "";
+      ob_start();
+      include_once plugin_dir_path(__FILE__) . 'views/mmhs-delete-fn.php';
+      $template = ob_get_contents();
+      ob_end_clean();
+      echo $template;
+    } else {
+      ob_start();
+      include_once plugin_dir_path(__FILE__) . 'views/mmhs-table-list.php';
+      $template = ob_get_contents();
+      ob_end_clean();
+      echo $template;
+    }
 }
