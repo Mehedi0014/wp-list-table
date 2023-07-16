@@ -90,10 +90,19 @@ class MmhsTableList extends WP_List_Table {
     );
   }
 
+  public function get_bulk_actions() {
+    $actions = array(
+      "delete"  => "Delete",
+      "Edit"    => "Edit"
+    );
+    return $actions;
+  }
+
 
   // get_columns
   public function get_columns() {
     $columns = array(
+      'cb'  => '<input type="checkbox />"',
       'id'           => 'ID',
       'title'        => 'Title',
       'mmhs_excerpt' => 'Excerpt',
@@ -101,6 +110,10 @@ class MmhsTableList extends WP_List_Table {
       'action'       => 'Action',
     );
     return $columns;
+  }
+
+  public function column_cb( $item ) {
+    return sprintf( '<input type="checkbox" name="post[]" value="%s" />', $item['id'] );
   }
 
   // columns_default
