@@ -23,39 +23,44 @@ class MmhsTableList extends WP_List_Table {
   }
 
   // This is custom method for shortable data
-  public function wp_list_table_data($orderby = '', $order = '') {    
-    if( $orderby == 'name' && $order == 'desc' ) {
-      $data = array(
-        array('id' => 4, 'name' => 'Shirso', 'email' => 'Shirso@gmail.com'),
-        array('id' => 2, 'name' => 'Pranto', 'email' => 'pranto@gmail.com'),
-        array('id' => 1, 'name' => 'Mehedi', 'email' => 'mehedi@gmail.com'),
-        array('id' => 3, 'name' => 'Hassan', 'email' => 'hassan@gmail.com'),
+  public function wp_list_table_data($orderby = '', $order = '') {
+    global $wpdb;
+
+    if( $orderby == 'title' && $order == 'desc' ){
+      $all_posts = $wpdb->get_results(
+        "SELECT * FROM " . $wpdb->posts . " WHERE post_status = 'publish' AND post_type = 'post' ORDER BY post_title DESC"
       );
-    } elseif( $orderby == 'name' && $order == 'asc' ) {
-      $data = array(
-        array('id' => 3, 'name' => 'Hassan', 'email' => 'hassan@gmail.com'),
-        array('id' => 1, 'name' => 'Mehedi', 'email' => 'mehedi@gmail.com'),
-        array('id' => 2, 'name' => 'Pranto', 'email' => 'pranto@gmail.com'),
-        array('id' => 4, 'name' => 'Shirso', 'email' => 'Shirso@gmail.com'),
+    } elseif( $orderby == 'title' && $order == 'asc' ) {
+      $all_posts = $wpdb->get_results(
+        "SELECT * FROM " . $wpdb->posts . " WHERE post_status = 'publish' AND post_type = 'post' ORDER BY post_title ASC"
       );
     } else {
-      $data = array(
-        array('id' => 3, 'name' => 'Hassan', 'email' => 'hassan@gmail.com'),
-        array('id' => 1, 'name' => 'Mehedi', 'email' => 'mehedi@gmail.com'),
-        array('id' => 2, 'name' => 'Pranto', 'email' => 'pranto@gmail.com'),
-        array('id' => 4, 'name' => 'Shirso', 'email' => 'Shirso@gmail.com'),
+      $all_posts = $wpdb->get_results(
+        "SELECT * FROM " . $wpdb->posts . " WHERE post_status = 'publish' AND post_type = 'post' ORDER BY id DESC"
       );
-    }        
-    return $data;
+    }
+
+    $posts_array = array();
+    if( count($all_posts) > 0 ) {
+      foreach( $all_posts as $index => $post ) {
+        $posts_array[] = array(
+          'id'            => $post->ID,
+          'title'         => $post->post_title,
+          'mmhs_excerpt'  => $post->post_excerpt,
+          'slug'          => $post->post_name,
+        );
+      }
+    }
+    return $posts_array;
   }
 
   public function get_hidden_columns() {
-    return array('email');
+    return array();
   }
 
   public function get_sortable_columns() {
     return array(
-      'name' => array('name', true) // default false (asc order) -> following the url you find its pass a query string.
+      'title' => array('title', false)
     );
   }
 
@@ -63,9 +68,10 @@ class MmhsTableList extends WP_List_Table {
   // get_columns
   public function get_columns() {
     $columns = array(
-      'id' => 'ID',
-      'name' => 'Name',
-      'email' => 'Email',
+      'id'           => 'ID',
+      'title'        => 'Title',
+      'mmhs_excerpt' => 'Excerpt',
+      'slug'         => 'Post Slug',
     );
     return $columns;
   }
@@ -74,8 +80,9 @@ class MmhsTableList extends WP_List_Table {
   public function column_default( $item, $column_name ) {
     switch( $column_name ) {
       case 'id':
-      case 'name':
-      case 'email':
+      case 'title':
+      case 'mmhs_excerpt':
+      case 'slug':
       return $item[$column_name];
       default:
       return 'No value found';
