@@ -12,10 +12,11 @@ class MmhsTableList extends WP_List_Table {
   // prepare_items
   public function prepare_items() {
     $orderby = isset( $_GET['orderby'] ) ? trim( $_GET['orderby'] ) : ""; // come form query string
-    $order = isset( $_GET['order'] ) ? trim( $_GET['order'] ) : ""; // come form query string       
+    $order = isset( $_GET['order'] ) ? trim( $_GET['order'] ) : ""; // come form query string
+    $search_term = isset( $_POST['s'] ) ? trim( $_POST['s'] ) : "";       
     $this->items = $this->wp_list_table_data( $orderby, $order); // Sokol data ja amara display korbo ta ekhane items variable e store kora holo.
 
-    $this->items = $this->wp_list_table_data( $orderby, $order); // Sokol data ja amara display korbo ta ekhane items variable e store kora holo.
+    $this->items = $this->wp_list_table_data( $orderby, $order, $search_term); // Sokol data ja amara display korbo ta ekhane items variable e store kora holo.
     $columns = $this->get_columns(); // Ai function dara j j kolam lagbe tar process kora hoy.
     $hidden = $this->get_hidden_columns(); // use to hide any coloumn. get_columns method e j column key diclare korechi just sei column key pass kore detay hobe: jemon name ba email.
     $sortable = $this->get_sortable_columns(); // table k shortable korar jonno use koar hoy. url er sese query string pass kore kaj ta kora hoy like: orderby=name&order=asc
@@ -23,21 +24,27 @@ class MmhsTableList extends WP_List_Table {
   }
 
   // This is custom method for shortable data
-  public function wp_list_table_data($orderby = '', $order = '') {
+  public function wp_list_table_data($orderby = '', $order = '', $search_term = '' ) {
     global $wpdb;
 
-    if( $orderby == 'title' && $order == 'desc' ){
+    if( !empty( $search_term ) ) {
       $all_posts = $wpdb->get_results(
-        "SELECT * FROM " . $wpdb->posts . " WHERE post_status = 'publish' AND post_type = 'post' ORDER BY post_title DESC"
-      );
-    } elseif( $orderby == 'title' && $order == 'asc' ) {
-      $all_posts = $wpdb->get_results(
-        "SELECT * FROM " . $wpdb->posts . " WHERE post_status = 'publish' AND post_type = 'post' ORDER BY post_title ASC"
+        "SELECT * FROM " . $wpdb->posts . " WHERE post_status = 'publish' AND post_type = 'post' AND ( post_title LIKE '%$search_term%' OR post_excerpt LIKE '%$search_term%' ) "
       );
     } else {
-      $all_posts = $wpdb->get_results(
-        "SELECT * FROM " . $wpdb->posts . " WHERE post_status = 'publish' AND post_type = 'post' ORDER BY id DESC"
-      );
+      if( $orderby == 'title' && $order == 'desc' ){
+        $all_posts = $wpdb->get_results(
+          "SELECT * FROM " . $wpdb->posts . " WHERE post_status = 'publish' AND post_type = 'post' ORDER BY post_title DESC"
+        );
+      } elseif( $orderby == 'title' && $order == 'asc' ) {
+        $all_posts = $wpdb->get_results(
+          "SELECT * FROM " . $wpdb->posts . " WHERE post_status = 'publish' AND post_type = 'post' ORDER BY post_title ASC"
+        );
+      } else {
+        $all_posts = $wpdb->get_results(
+          "SELECT * FROM " . $wpdb->posts . " WHERE post_status = 'publish' AND post_type = 'post' ORDER BY id DESC"
+        );
+      }
     }
 
     $posts_array = array();
@@ -98,6 +105,9 @@ function mmhs_show_data_list_table() {
   $mmhs_table = new MmhsTableList();
   $mmhs_table->prepare_items();
   echo '<h3>This is list table</h3>';
+  echo '<form method="post" name="frm_search_post" action=" ' . $_SERVER["PHP_SELF"] . '?page=mmhs_list_table ">';
+  $mmhs_table->search_box('Search post', 'search_post_id', );
+  echo '</form>';
   $mmhs_table->display();
 }
 mmhs_show_data_list_table();
